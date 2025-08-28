@@ -1,36 +1,149 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📚 BookNook
 
-## Getting Started
+A mobile-first, map-based application that creates a global network of tiny libraries. Users seamlessly discover nearby libraries, contribute books through AI-powered photo parsing, and rate both literature and library craftsmanship.
 
-First, run the development server:
+## 🚀 Quick Start
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Mapbox account and access token
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd booknook
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp env.example .env.local
+   ```
+   
+   Edit `.env.local` and add your Mapbox access token:
+   ```env
+   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_actual_mapbox_token_here
+   ```
+
+4. **Get a Mapbox access token**
+   - Go to [Mapbox Account](https://account.mapbox.com/access-tokens/)
+   - Create a new token or use your default public token
+   - Copy the token to your `.env.local` file
+
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🗂 Project Structure
+
+```
+booknook/
+├── src/
+│   ├── app/                          # Next.js App Router
+│   │   ├── map/                      # Map interface (main screen)
+│   │   │   └── page.tsx             # Map page component
+│   │   ├── globals.css               # SINGLE SOURCE OF TRUTH for styling
+│   │   ├── layout.tsx                # Root layout
+│   │   └── page.tsx                  # Landing page (redirects to map)
+│   ├── components/                    # Reusable UI components
+│   │   └── maps/                     # Map-related components
+│   │       ├── Map.tsx               # Main Mapbox component
+│   │       └── BottomSheet.tsx       # Bottom sheet menu
+│   ├── lib/                          # Utility libraries
+│   │   └── mapbox/                   # Mapbox utilities
+│   │       ├── mapbox-client.ts      # Mapbox client & utilities
+│   │       └── mapbox.css            # Mapbox styling
+│   └── types/                        # TypeScript definitions
+├── env.example                       # Environment variables template
+└── README.md                         # This file
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🗺 Mapbox Integration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The application uses Mapbox GL JS for the interactive map interface. Key features include:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Full-screen map** (100dvh × 100dvw)
+- **Geolocation** with automatic user positioning
+- **Interactive controls** (zoom, compass, locate me)
+- **Bottom sheet menu** with smooth animations
+- **Mobile-first design** optimized for touch interactions
 
-## Learn More
+### Mapbox Configuration
 
-To learn more about Next.js, take a look at the following resources:
+The map is configured in `src/lib/mapbox/mapbox-client.ts` with:
+- Default center coordinates
+- Zoom levels
+- Map style (streets-v12)
+- Custom controls and interactions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🎨 Design System
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application follows a **Single Source of Truth** philosophy where `src/app/globals.css` contains all design tokens including:
 
-## Deploy on Vercel
+- Color palette
+- Spacing scale
+- Border radius values
+- Shadow definitions
+- Typography settings
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔧 Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+### Code Standards
+
+- **TypeScript strict mode** - Comprehensive type coverage
+- **DRY principles** - No code duplication
+- **Component composition** - Reusable UI primitives
+- **Mobile-first** - Responsive design approach
+
+## 🚧 Next Steps
+
+The current implementation includes:
+- ✅ Mapbox integration with full-screen map
+- ✅ Bottom sheet menu with smooth animations
+- ✅ Geolocation and user positioning
+- ✅ Basic map controls and interactions
+
+Upcoming features:
+- [ ] Authentication with Clerk
+- [ ] Database integration with Supabase
+- [ ] Book contribution workflow
+- [ ] AI-powered image parsing
+- [ ] Search and discovery features
+
+## 📱 Mobile Experience
+
+The application is designed for mobile-first usage with:
+- Touch-optimized interactions
+- Full-screen map experience
+- Native-like bottom sheet animations
+- Responsive design patterns
+
+## 🤝 Contributing
+
+1. Follow the established file structure
+2. Maintain DRY principles
+3. Use design tokens from `globals.css`
+4. Write self-documenting code
+5. Test on mobile devices
+
+## 📄 License
+
+[Add your license here]

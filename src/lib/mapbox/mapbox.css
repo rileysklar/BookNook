@@ -1,0 +1,33 @@
+/* Mapbox GL CSS - required for proper map rendering */
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
+/* Custom Mapbox overrides */
+.mapboxgl-map {
+  font-family: inherit;
+}
+
+.mapboxgl-popup-content {
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border: none;
+  padding: 0;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: white;
+}
+
+.mapboxgl-ctrl-group {
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  border: none;
+}
+
+.mapboxgl-ctrl-group button {
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.mapboxgl-ctrl-group button:hover {
+  background-color: #f3f4f6;
+}

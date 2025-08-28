@@ -1,0 +1,725 @@
+---
+alwaysApply: true
+descripption:BookNook is a mobile-first, map-based application that creates a global network of tiny libraries. Users seamlessly discover nearby libraries, contribute books through AI-powered photo parsing, and rate both literature and library craftsmanship. The system maintains a distributed catalog of books with precise geolocation, visual documentation, and community-driven quality metrics.
+---
+
+# BookNook - Senior Software Engineering Playbook
+
+## 🎯 Core Mission
+
+**BookNook** is a mobile-first, map-based application that creates a global network of tiny libraries. Users seamlessly discover nearby libraries, contribute books through AI-powered photo parsing, and rate both literature and library craftsmanship. The system maintains a distributed catalog of books with precise geolocation, visual documentation, and community-driven quality metrics.
+
+## 🏗 Architecture Principles
+
+### Single Source of Truth Philosophy
+- **`globals.css` is the design system foundation** - all styling decisions flow from here
+- **Centralized type definitions** - shared interfaces across frontend/backend
+- **Unified configuration management** - environment, feature flags, and constants
+- **Single database schema** - no duplicate data models or conflicting definitions
+
+### DRY (Don't Repeat Yourself) Enforcement
+- **Extract on second occurrence** - identify patterns early, refactor immediately
+- **Shared utility libraries** - common functions, validators, and business logic
+- **Component composition over inheritance** - reusable UI primitives
+- **Consolidated API patterns** - unified error handling, response formatting, and middleware
+
+### Progressive Enhancement Strategy
+- **Core functionality first** - basic book discovery and contribution
+- **Advanced features layered** - AI parsing, real-time updates, social features
+- **Graceful degradation** - offline support, fallback experiences
+- **Performance optimization** - lazy loading, caching, and code splitting
+
+## 🛠 Technology Stack
+
+### Frontend Foundation
+- **Next.js 14+ (App Router)** - Server-side rendering, static generation, API routes
+- **TypeScript 5+** - Strict mode, comprehensive type coverage, zero `any` usage
+- **Tailwind CSS** - Utility-first styling with custom design tokens from `globals.css`
+- **ShadCN UI** - Accessible, composable component library with consistent theming
+
+### Authentication & User Management
+- **Clerk.com** - Seamless authentication, magic links, OAuth providers
+- **Role-based access control** - User permissions, content moderation
+- **Session management** - Persistent login states, secure token handling
+
+### Data Layer & Storage
+- **Supabase (PostgreSQL)** - Primary database with PostGIS for geospatial queries
+- **Supabase Storage** - Book cover images, library photos, user uploads
+- **Real-time subscriptions** - Live updates for new books and ratings
+- **Row Level Security** - Data isolation and privacy protection
+
+### Mapping & Geolocation
+- **Mapbox GL JS** - Interactive, mobile-optimized mapping
+- **Geolocation API** - Precise user positioning and library discovery
+- **PostGIS integration** - Efficient spatial queries and proximity searches
+
+### Search & Discovery
+- **Elasticsearch** - Full-text search, fuzzy matching, relevance scoring
+- **Geospatial indexing** - Location-based book and library discovery
+- **Analytics integration** - Search patterns, popular content, trending items
+
+### AI & Image Processing
+- **OpenAI Vision API** - Book cover text extraction and metadata parsing
+- **Replicate** - Alternative AI models for image analysis
+- **Image optimization** - Automatic resizing, compression, and format conversion
+
+## 📱 User Experience Architecture
+
+### Seamless Authentication Flow
+1. **Landing page** - Immediate value proposition and feature showcase
+2. **Clerk integration** - One-click login, no redirects or page refreshes
+3. **Permission handling** - Location access, camera permissions, storage quotas
+4. **Onboarding** - Guided tour for first-time users
+
+### Map-Centric Interface
+- **Full-screen map view** - Primary navigation and discovery method
+- **Interactive markers** - Library locations with book counts and ratings
+- **Crosshair targeting** - Precise location selection for new contributions
+- **Gesture support** - Pinch-to-zoom, swipe navigation, long-press actions
+
+### Book Contribution Workflow
+1. **Photo capture** - High-quality image with automatic metadata extraction
+2. **AI parsing** - Title, author, ISBN, and genre identification
+3. **Location verification** - GPS coordinates and library association
+4. **Quality rating** - Book condition and library craftsmanship assessment
+5. **Community validation** - Moderation and duplicate detection
+
+### Discovery & Search
+- **Multi-view toggle** - Map view ↔ List view with synchronized state
+- **Advanced filtering** - Genre, rating, distance, recency, popularity
+- **Saved searches** - User preferences and frequent queries
+- **Recommendations** - AI-powered content suggestions based on history
+
+## 🗂 Project Structure & Organization
+
+```
+booknook/
+├── src/
+│   ├── app/                          # Next.js App Router
+│   │   ├── (auth)/                   # Authentication routes
+│   │   │   ├── sign-in/
+│   │   │   ├── sign-up/
+│   │   │   └── [...clerk].ts
+│   │   ├── (dashboard)/              # Protected dashboard routes
+│   │   │   ├── map/                  # Primary map interface
+│   │   │   ├── list/                 # Book/library list view
+│   │   │   ├── add/                  # Contribution workflow
+│   │   │   ├── profile/              # User settings & history
+│   │   │   └── admin/                # Moderation tools
+│   │   ├── api/                      # API routes
+│   │   │   ├── books/                # Book CRUD operations
+│   │   │   ├── libraries/            # Library management
+│   │   │   ├── search/               # Elasticsearch integration
+│   │   │   ├── uploads/              # File handling & AI processing
+│   │   │   └── ratings/              # Review system
+│   │   ├── globals.css               # SINGLE SOURCE OF TRUTH for styling
+│   │   ├── layout.tsx                # Root layout with providers
+│   │   └── page.tsx                  # Landing page
+│   ├── components/                    # Reusable UI components
+│   │   ├── ui/                       # ShadCN UI primitives
+│   │   ├── forms/                    # Form components with validation
+│   │   ├── maps/                     # Map-related components
+│   │   ├── books/                    # Book display components
+│   │   └── layout/                   # Layout and navigation
+│   ├── lib/                          # Utility libraries
+│   │   ├── supabase/                 # Database client & helpers
+│   │   ├── clerk/                    # Authentication utilities
+│   │   ├── mapbox/                   # Mapping utilities
+│   │   ├── ai/                       # AI processing logic
+│   │   ├── elasticsearch/            # Search client & queries
+│   │   ├── validation/               # Schema validation & sanitization
+│   │   └── utils/                    # Common utilities & helpers
+│   ├── types/                        # TypeScript type definitions
+│   │   ├── database.ts               # Database schema types
+│   │   ├── api.ts                    # API request/response types
+│   │   ├── components.ts             # Component prop types
+│   │   └── common.ts                 # Shared utility types
+│   ├── hooks/                        # Custom React hooks
+│   │   ├── useAuth.ts                # Authentication state
+│   │   ├── useMap.ts                 # Map interaction logic
+│   │   ├── useBooks.ts               # Book data management
+│   │   └── useSearch.ts              # Search functionality
+│   └── styles/                       # Additional styling utilities
+├── prisma/                           # Database schema & migrations
+├── public/                           # Static assets
+├── docs/                             # API documentation & guides
+└── tests/                            # Test suites
+```
+
+## 🗄 Database Schema Design
+
+### Core Entities
+
+```sql
+-- Users table (extends Clerk user data)
+CREATE TABLE users (
+    id UUID PRIMARY KEY REFERENCES auth.users(id),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    display_name VARCHAR(100),
+    avatar_url TEXT,
+    preferences JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Libraries table (tiny library locations)
+CREATE TABLE libraries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    creator_id UUID REFERENCES users(id) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    coordinates POINT NOT NULL,
+    address TEXT,
+    is_public BOOLEAN DEFAULT true,
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Books table (individual book entries)
+CREATE TABLE books (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    library_id UUID REFERENCES libraries(id) NOT NULL,
+    contributor_id UUID REFERENCES users(id) NOT NULL,
+    title VARCHAR(500) NOT NULL,
+    author VARCHAR(200),
+    isbn VARCHAR(20),
+    genre VARCHAR(100),
+    condition_rating INTEGER CHECK (condition_rating >= 1 AND condition_rating <= 5),
+    ai_metadata JSONB,
+    photo_urls TEXT[],
+    status VARCHAR(20) DEFAULT 'available',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Ratings table (user reviews)
+CREATE TABLE ratings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) NOT NULL,
+    book_id UUID REFERENCES books(id),
+    library_id UUID REFERENCES libraries(id),
+    book_rating INTEGER CHECK (book_rating >= 1 AND book_rating <= 5),
+    library_rating INTEGER CHECK (library_rating >= 1 AND library_rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Search index table (Elasticsearch sync)
+CREATE TABLE search_index (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    entity_type VARCHAR(20) NOT NULL, -- 'book' or 'library'
+    entity_id UUID NOT NULL,
+    search_vector tsvector,
+    location POINT,
+    metadata JSONB,
+    last_indexed TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### Indexes & Performance
+```sql
+-- Geospatial indexes
+CREATE INDEX idx_libraries_coordinates ON libraries USING GIST (coordinates);
+CREATE INDEX idx_books_library_id ON books(library_id);
+CREATE INDEX idx_ratings_user_id ON ratings(user_id);
+
+-- Full-text search indexes
+CREATE INDEX idx_books_search ON books USING GIN (to_tsvector('english', title || ' ' || COALESCE(author, '')));
+CREATE INDEX idx_search_index_vector ON search_index USING GIN (search_vector);
+
+-- Composite indexes for common queries
+CREATE INDEX idx_books_library_status ON books(library_id, status);
+CREATE INDEX idx_ratings_entity ON ratings(book_id, library_id);
+```
+
+## 🔧 Development Workflow
+
+### Phase 1: Foundation & Infrastructure
+- [ ] **Project initialization** - Next.js setup, TypeScript configuration
+- [ ] **Design system** - `globals.css` foundation, ShadCN integration
+- [ ] **Authentication** - Clerk setup, protected routes, user management
+- [ ] **Database** - Supabase connection, schema implementation, migrations
+
+### Phase 2: Core Functionality
+- [ ] **Map integration** - Mapbox setup, geolocation, marker management
+- [ ] **Basic CRUD** - Book and library creation, reading, updating
+- [ ] **File uploads** - Image handling, Supabase storage integration
+- [ ] **User interface** - Responsive design, mobile-first approach
+
+### Phase 3: Advanced Features
+- [ ] **AI integration** - Image parsing, metadata extraction
+- [ ] **Search system** - Elasticsearch setup, geospatial queries
+- [ ] **Rating system** - Review forms, community feedback
+- [ ] **Real-time updates** - WebSocket integration, live notifications
+
+### Phase 4: Optimization & Polish
+- [ ] **Performance** - Lazy loading, caching, code splitting
+- [ ] **Testing** - Unit tests, integration tests, E2E testing
+- [ ] **Documentation** - API docs, user guides, developer guides
+- [ ] **Deployment** - Production build, monitoring, analytics
+
+## 🚀 Performance & Scalability
+
+### Frontend Optimization
+- **Code splitting** - Route-based and component-based lazy loading
+- **Image optimization** - Next.js Image component, WebP format, responsive sizes
+- **Bundle analysis** - Regular bundle size monitoring and optimization
+- **Caching strategy** - Service worker, local storage, HTTP caching
+
+### Backend Performance
+- **Database optimization** - Query optimization, connection pooling, read replicas
+- **API efficiency** - Pagination, filtering, selective field loading
+- **Background processing** - Queue systems for heavy operations
+- **CDN integration** - Global content delivery for static assets
+
+### Search Performance
+- **Elasticsearch tuning** - Index optimization, query caching, shard management
+- **Geospatial queries** - Spatial indexing, proximity calculations
+- **Result ranking** - Relevance scoring, user preference weighting
+- **Search analytics** - Query patterns, popular searches, performance metrics
+
+## 🧪 Testing Strategy
+
+### Testing Pyramid
+- **Unit tests** - Component logic, utility functions, business logic
+- **Integration tests** - API endpoints, database operations, external services
+- **E2E tests** - Critical user journeys, cross-browser compatibility
+- **Performance tests** - Load testing, stress testing, monitoring
+
+### Testing Tools
+- **Jest** - Unit and integration testing framework
+- **React Testing Library** - Component testing with user-centric approach
+- **Playwright** - E2E testing with cross-browser support
+- **MSW** - API mocking and testing
+
+## 🔒 Security & Privacy
+
+### Data Protection
+- **Row Level Security** - Supabase RLS policies for data isolation
+- **Input validation** - Schema validation, sanitization, XSS prevention
+- **Rate limiting** - API abuse prevention, DDoS protection
+- **Encryption** - Data at rest and in transit encryption
+
+### User Privacy
+- **GDPR compliance** - Data retention, user consent, right to deletion
+- **Location privacy** - Optional location sharing, privacy controls
+- **Content moderation** - Community guidelines, automated detection
+- **Audit logging** - User action tracking, security monitoring
+
+## 📊 Monitoring & Analytics
+
+### Application Monitoring
+- **Error tracking** - Sentry integration, error boundaries, logging
+- **Performance monitoring** - Core Web Vitals, API response times
+- **User analytics** - Feature usage, user behavior, conversion metrics
+- **Business metrics** - Book contributions, library growth, community engagement
+
+### Infrastructure Monitoring
+- **Database performance** - Query performance, connection health, storage usage
+- **API monitoring** - Endpoint health, response times, error rates
+- **Search performance** - Elasticsearch health, query performance, index status
+- **External services** - Third-party API health, rate limit monitoring
+
+## 🚀 Deployment & DevOps
+
+### Environment Management
+- **Development** - Local development with hot reloading
+- **Staging** - Production-like environment for testing
+- **Production** - Optimized build with monitoring and analytics
+
+### Deployment Pipeline
+- **CI/CD** - GitHub Actions, automated testing, deployment
+- **Infrastructure** - Vercel for frontend, Supabase for backend
+- **Monitoring** - Health checks, performance alerts, error notifications
+- **Rollback** - Quick rollback procedures, feature flags
+
+## 📚 Development Standards
+
+### Code Quality
+- **TypeScript strict mode** - No `any` types, comprehensive type coverage
+- **ESLint + Prettier** - Consistent code style, automated formatting
+- **Pre-commit hooks** - Code quality checks, test execution
+- **Code review** - Peer review process, automated checks
+
+### Documentation
+- **Inline documentation** - JSDoc comments, TypeScript interfaces
+- **API documentation** - OpenAPI specs, endpoint descriptions
+- **Component documentation** - Storybook integration, usage examples
+- **Architecture decisions** - ADR (Architecture Decision Records)
+
+### Git Workflow
+- **Feature branches** - Branch naming conventions, PR templates
+- **Commit messages** - Conventional commits, semantic versioning
+- **Release process** - Automated versioning, changelog generation
+- **Hotfix procedures** - Emergency fixes, production patches
+
+---
+
+**Remember**: This is a living document. Update it as the project evolves, and always prioritize code quality, user experience, and maintainability over quick wins.
+
+
+Global Library View
+
+Map/List toggle.
+# BookNook - Senior Software Engineering Playbook
+
+## 🎯 Core Mission
+
+**BookNook** is a mobile-first, map-based application that creates a global network of tiny libraries. Users seamlessly discover nearby libraries, contribute books through AI-powered photo parsing, and rate both literature and library craftsmanship. The system maintains a distributed catalog of books with precise geolocation, visual documentation, and community-driven quality metrics.
+
+## 🏗 Architecture Principles
+
+### Single Source of Truth Philosophy
+- **`globals.css` is the design system foundation** - all styling decisions flow from here
+- **Centralized type definitions** - shared interfaces across frontend/backend
+- **Unified configuration management** - environment, feature flags, and constants
+- **Single database schema** - no duplicate data models or conflicting definitions
+
+### DRY (Don't Repeat Yourself) Enforcement
+- **Extract on second occurrence** - identify patterns early, refactor immediately
+- **Shared utility libraries** - common functions, validators, and business logic
+- **Component composition over inheritance** - reusable UI primitives
+- **Consolidated API patterns** - unified error handling, response formatting, and middleware
+
+### Progressive Enhancement Strategy
+- **Core functionality first** - basic book discovery and contribution
+- **Advanced features layered** - AI parsing, real-time updates, social features
+- **Graceful degradation** - offline support, fallback experiences
+- **Performance optimization** - lazy loading, caching, and code splitting
+
+## 🛠 Technology Stack
+
+### Frontend Foundation
+- **Next.js 14+ (App Router)** - Server-side rendering, static generation, API routes
+- **TypeScript 5+** - Strict mode, comprehensive type coverage, zero `any` usage
+- **Tailwind CSS** - Utility-first styling with custom design tokens from `globals.css`
+- **ShadCN UI** - Accessible, composable component library with consistent theming
+
+### Authentication & User Management
+- **Clerk.com** - Seamless authentication, magic links, OAuth providers
+- **Role-based access control** - User permissions, content moderation
+- **Session management** - Persistent login states, secure token handling
+
+### Data Layer & Storage
+- **Supabase (PostgreSQL)** - Primary database with PostGIS for geospatial queries
+- **Supabase Storage** - Book cover images, library photos, user uploads
+- **Real-time subscriptions** - Live updates for new books and ratings
+- **Row Level Security** - Data isolation and privacy protection
+
+### Mapping & Geolocation
+- **Mapbox GL JS** - Interactive, mobile-optimized mapping
+- **Geolocation API** - Precise user positioning and library discovery
+- **PostGIS integration** - Efficient spatial queries and proximity searches
+
+### Search & Discovery
+- **Elasticsearch** - Full-text search, fuzzy matching, relevance scoring
+- **Geospatial indexing** - Location-based book and library discovery
+- **Analytics integration** - Search patterns, popular content, trending items
+
+### AI & Image Processing
+- **OpenAI Vision API** - Book cover text extraction and metadata parsing
+- **Replicate** - Alternative AI models for image analysis
+- **Image optimization** - Automatic resizing, compression, and format conversion
+
+## 📱 User Experience Architecture
+
+### Seamless Authentication Flow
+1. **Landing page** - Immediate value proposition and feature showcase
+2. **Clerk integration** - One-click login, no redirects or page refreshes
+3. **Permission handling** - Location access, camera permissions, storage quotas
+4. **Onboarding** - Guided tour for first-time users
+
+### Map-Centric Interface
+- **Full-screen map view** - Primary navigation and discovery method
+- **Interactive markers** - Library locations with book counts and ratings
+- **Crosshair targeting** - Precise location selection for new contributions
+- **Gesture support** - Pinch-to-zoom, swipe navigation, long-press actions
+
+### Book Contribution Workflow
+1. **Photo capture** - High-quality image with automatic metadata extraction
+2. **AI parsing** - Title, author, ISBN, and genre identification
+3. **Location verification** - GPS coordinates and library association
+4. **Quality rating** - Book condition and library craftsmanship assessment
+5. **Community validation** - Moderation and duplicate detection
+
+### Discovery & Search
+- **Multi-view toggle** - Map view ↔ List view with synchronized state
+- **Advanced filtering** - Genre, rating, distance, recency, popularity
+- **Saved searches** - User preferences and frequent queries
+- **Recommendations** - AI-powered content suggestions based on history
+
+## 🗂 Project Structure & Organization
+
+```
+booknook/
+├── src/
+│   ├── app/                          # Next.js App Router
+│   │   ├── (auth)/                   # Authentication routes
+│   │   │   ├── sign-in/
+│   │   │   ├── sign-up/
+│   │   │   └── [...clerk].ts
+│   │   ├── (dashboard)/              # Protected dashboard routes
+│   │   │   ├── map/                  # Primary map interface
+│   │   │   ├── list/                 # Book/library list view
+│   │   │   ├── add/                  # Contribution workflow
+│   │   │   ├── profile/              # User settings & history
+│   │   │   └── admin/                # Moderation tools
+│   │   ├── api/                      # API routes
+│   │   │   ├── books/                # Book CRUD operations
+│   │   │   ├── libraries/            # Library management
+│   │   │   ├── search/               # Elasticsearch integration
+│   │   │   ├── uploads/              # File handling & AI processing
+│   │   │   └── ratings/              # Review system
+│   │   ├── globals.css               # SINGLE SOURCE OF TRUTH for styling
+│   │   ├── layout.tsx                # Root layout with providers
+│   │   └── page.tsx                  # Landing page
+│   ├── components/                    # Reusable UI components
+│   │   ├── ui/                       # ShadCN UI primitives
+│   │   ├── forms/                    # Form components with validation
+│   │   ├── maps/                     # Map-related components
+│   │   ├── books/                    # Book display components
+│   │   └── layout/                   # Layout and navigation
+│   ├── lib/                          # Utility libraries
+│   │   ├── supabase/                 # Database client & helpers
+│   │   ├── clerk/                    # Authentication utilities
+│   │   ├── mapbox/                   # Mapping utilities
+│   │   ├── ai/                       # AI processing logic
+│   │   ├── elasticsearch/            # Search client & queries
+│   │   ├── validation/               # Schema validation & sanitization
+│   │   └── utils/                    # Common utilities & helpers
+│   ├── types/                        # TypeScript type definitions
+│   │   ├── database.ts               # Database schema types
+│   │   ├── api.ts                    # API request/response types
+│   │   ├── components.ts             # Component prop types
+│   │   └── common.ts                 # Shared utility types
+│   ├── hooks/                        # Custom React hooks
+│   │   ├── useAuth.ts                # Authentication state
+│   │   ├── useMap.ts                 # Map interaction logic
+│   │   ├── useBooks.ts               # Book data management
+│   │   └── useSearch.ts              # Search functionality
+│   └── styles/                       # Additional styling utilities
+├── prisma/                           # Database schema & migrations
+├── public/                           # Static assets
+├── docs/                             # API documentation & guides
+└── tests/                            # Test suites
+```
+
+## 🗄 Database Schema Design
+
+### Core Entities
+
+```sql
+-- Users table (extends Clerk user data)
+CREATE TABLE users (
+    id UUID PRIMARY KEY REFERENCES auth.users(id),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    display_name VARCHAR(100),
+    avatar_url TEXT,
+    preferences JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Libraries table (tiny library locations)
+CREATE TABLE libraries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    creator_id UUID REFERENCES users(id) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    coordinates POINT NOT NULL,
+    address TEXT,
+    is_public BOOLEAN DEFAULT true,
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Books table (individual book entries)
+CREATE TABLE books (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    library_id UUID REFERENCES libraries(id) NOT NULL,
+    contributor_id UUID REFERENCES users(id) NOT NULL,
+    title VARCHAR(500) NOT NULL,
+    author VARCHAR(200),
+    isbn VARCHAR(20),
+    genre VARCHAR(100),
+    condition_rating INTEGER CHECK (condition_rating >= 1 AND condition_rating <= 5),
+    ai_metadata JSONB,
+    photo_urls TEXT[],
+    status VARCHAR(20) DEFAULT 'available',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Ratings table (user reviews)
+CREATE TABLE ratings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) NOT NULL,
+    book_id UUID REFERENCES books(id),
+    library_id UUID REFERENCES libraries(id),
+    book_rating INTEGER CHECK (book_rating >= 1 AND book_rating <= 5),
+    library_rating INTEGER CHECK (library_rating >= 1 AND library_rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Search index table (Elasticsearch sync)
+CREATE TABLE search_index (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    entity_type VARCHAR(20) NOT NULL, -- 'book' or 'library'
+    entity_id UUID NOT NULL,
+    search_vector tsvector,
+    location POINT,
+    metadata JSONB,
+    last_indexed TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### Indexes & Performance
+```sql
+-- Geospatial indexes
+CREATE INDEX idx_libraries_coordinates ON libraries USING GIST (coordinates);
+CREATE INDEX idx_books_library_id ON books(library_id);
+CREATE INDEX idx_ratings_user_id ON ratings(user_id);
+
+-- Full-text search indexes
+CREATE INDEX idx_books_search ON books USING GIN (to_tsvector('english', title || ' ' || COALESCE(author, '')));
+CREATE INDEX idx_search_index_vector ON search_index USING GIN (search_vector);
+
+-- Composite indexes for common queries
+CREATE INDEX idx_books_library_status ON books(library_id, status);
+CREATE INDEX idx_ratings_entity ON ratings(book_id, library_id);
+```
+
+## 🔧 Development Workflow
+
+### Phase 1: Foundation & Infrastructure
+- [ ] **Project initialization** - Next.js setup, TypeScript configuration
+- [ ] **Design system** - `globals.css` foundation, ShadCN integration
+- [ ] **Authentication** - Clerk setup, protected routes, user management
+- [ ] **Database** - Supabase connection, schema implementation, migrations
+
+### Phase 2: Core Functionality
+- [ ] **Map integration** - Mapbox setup, geolocation, marker management
+- [ ] **Basic CRUD** - Book and library creation, reading, updating
+- [ ] **File uploads** - Image handling, Supabase storage integration
+- [ ] **User interface** - Responsive design, mobile-first approach
+
+### Phase 3: Advanced Features
+- [ ] **AI integration** - Image parsing, metadata extraction
+- [ ] **Search system** - Elasticsearch setup, geospatial queries
+- [ ] **Rating system** - Review forms, community feedback
+- [ ] **Real-time updates** - WebSocket integration, live notifications
+
+### Phase 4: Optimization & Polish
+- [ ] **Performance** - Lazy loading, caching, code splitting
+- [ ] **Testing** - Unit tests, integration tests, E2E testing
+- [ ] **Documentation** - API docs, user guides, developer guides
+- [ ] **Deployment** - Production build, monitoring, analytics
+
+## 🚀 Performance & Scalability
+
+### Frontend Optimization
+- **Code splitting** - Route-based and component-based lazy loading
+- **Image optimization** - Next.js Image component, WebP format, responsive sizes
+- **Bundle analysis** - Regular bundle size monitoring and optimization
+- **Caching strategy** - Service worker, local storage, HTTP caching
+
+### Backend Performance
+- **Database optimization** - Query optimization, connection pooling, read replicas
+- **API efficiency** - Pagination, filtering, selective field loading
+- **Background processing** - Queue systems for heavy operations
+- **CDN integration** - Global content delivery for static assets
+
+### Search Performance
+- **Elasticsearch tuning** - Index optimization, query caching, shard management
+- **Geospatial queries** - Spatial indexing, proximity calculations
+- **Result ranking** - Relevance scoring, user preference weighting
+- **Search analytics** - Query patterns, popular searches, performance metrics
+
+## 🧪 Testing Strategy
+
+### Testing Pyramid
+- **Unit tests** - Component logic, utility functions, business logic
+- **Integration tests** - API endpoints, database operations, external services
+- **E2E tests** - Critical user journeys, cross-browser compatibility
+- **Performance tests** - Load testing, stress testing, monitoring
+
+### Testing Tools
+- **Jest** - Unit and integration testing framework
+- **React Testing Library** - Component testing with user-centric approach
+- **Playwright** - E2E testing with cross-browser support
+- **MSW** - API mocking and testing
+
+## 🔒 Security & Privacy
+
+### Data Protection
+- **Row Level Security** - Supabase RLS policies for data isolation
+- **Input validation** - Schema validation, sanitization, XSS prevention
+- **Rate limiting** - API abuse prevention, DDoS protection
+- **Encryption** - Data at rest and in transit encryption
+
+### User Privacy
+- **GDPR compliance** - Data retention, user consent, right to deletion
+- **Location privacy** - Optional location sharing, privacy controls
+- **Content moderation** - Community guidelines, automated detection
+- **Audit logging** - User action tracking, security monitoring
+
+## 📊 Monitoring & Analytics
+
+### Application Monitoring
+- **Error tracking** - Sentry integration, error boundaries, logging
+- **Performance monitoring** - Core Web Vitals, API response times
+- **User analytics** - Feature usage, user behavior, conversion metrics
+- **Business metrics** - Book contributions, library growth, community engagement
+
+### Infrastructure Monitoring
+- **Database performance** - Query performance, connection health, storage usage
+- **API monitoring** - Endpoint health, response times, error rates
+- **Search performance** - Elasticsearch health, query performance, index status
+- **External services** - Third-party API health, rate limit monitoring
+
+## 🚀 Deployment & DevOps
+
+### Environment Management
+- **Development** - Local development with hot reloading
+- **Staging** - Production-like environment for testing
+- **Production** - Optimized build with monitoring and analytics
+
+### Deployment Pipeline
+- **CI/CD** - GitHub Actions, automated testing, deployment
+- **Infrastructure** - Vercel for frontend, Supabase for backend
+- **Monitoring** - Health checks, performance alerts, error notifications
+- **Rollback** - Quick rollback procedures, feature flags
+
+## 📚 Development Standards
+
+### Code Quality
+- **TypeScript strict mode** - No `any` types, comprehensive type coverage
+- **ESLint + Prettier** - Consistent code style, automated formatting
+- **Pre-commit hooks** - Code quality checks, test execution
+- **Code review** - Peer review process, automated checks
+
+### Documentation
+- **Inline documentation** - JSDoc comments, TypeScript interfaces
+- **API documentation** - OpenAPI specs, endpoint descriptions
+- **Component documentation** - Storybook integration, usage examples
+- **Architecture decisions** - ADR (Architecture Decision Records)
+
+### Git Workflow
+- **Feature branches** - Branch naming conventions, PR templates
+- **Commit messages** - Conventional commits, semantic versioning
+- **Release process** - Automated versioning, changelog generation
+- **Hotfix procedures** - Emergency fixes, production patches
+
+---
+
+**Remember**: This is a living document. Update it as the project evolves, and always prioritize code quality, user experience, and maintainability over quick wins.
+
+
+Global Library View
+
+Map/List toggle.
