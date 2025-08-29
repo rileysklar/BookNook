@@ -6,6 +6,24 @@ const nextConfig: NextConfig = {
   
   // Fix the workspace root warning by explicitly setting the output file tracing root
   outputFileTracingRoot: __dirname,
+  
+  // Configure image domains for external image sources
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.clerk.dev',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

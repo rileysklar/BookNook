@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase/client'
 import { auth } from '@clerk/nextjs/server'
 
 export async function GET(request: NextRequest) {
@@ -7,27 +7,6 @@ export async function GET(request: NextRequest) {
   
   try {
     console.log('✅ Try block started')
-    
-    // Check environment variables
-    const supabaseUrl = 'https://sjespiofspkuhqvlpymy.supabase.co'
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    
-    console.log('🔑 Environment check:', {
-      hasUrl: !!supabaseUrl,
-      hasServiceRoleKey: !!serviceRoleKey,
-      serviceRoleKeyLength: serviceRoleKey?.length || 0
-    })
-    
-    if (!serviceRoleKey) {
-      console.log('❌ Service role key missing')
-      throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing')
-    }
-    
-    console.log('✅ Service role key found')
-    
-    // Create client
-    const supabase = createClient(supabaseUrl, serviceRoleKey)
-    console.log('✅ Supabase client created')
     
     // Test basic connection first
     console.log('🔌 Testing basic connection...')
@@ -43,17 +22,20 @@ export async function GET(request: NextRequest) {
     
     console.log('✅ Basic connection test passed')
     
-    // Now try the function
-    console.log('📞 Calling get_all_libraries function...')
+    // Fetch libraries directly from the table
+    console.log('📚 Fetching libraries from table...')
     const { data, error } = await supabase
-      .rpc('get_all_libraries')
+      .from('libraries')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
     
     if (error) {
-      console.log('❌ Function call failed:', error)
+      console.log('❌ Table fetch failed:', error)
       throw error
     }
     
-    console.log('✅ Function call successful, data length:', data?.length || 0)
+    console.log('✅ Table fetch successful, data length:', data?.length || 0)
     return NextResponse.json({ libraries: data })
     
   } catch (error) {
@@ -97,21 +79,10 @@ export async function POST(request: NextRequest) {
 
     const [lng, lat] = coordinates
 
-    // Create client for POST request
-    const supabaseUrl = 'https://sjespiofspkuhqvlpymy.supabase.co'
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    
-    if (!serviceRoleKey) {
-      throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing')
-    }
-    
-    const supabase = createClient(supabaseUrl, serviceRoleKey)
-
-    // Insert directly into the libraries table instead of using the RPC function
+    // Insert into the libraries table using the existing client
     const { data, error } = await supabase
       .from('libraries')
       .insert({
-        creator_id: userId,
         name: name.trim(),
         description: description?.trim() || null,
         coordinates: `(${lng},${lat})`,

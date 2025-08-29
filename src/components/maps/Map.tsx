@@ -32,6 +32,7 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, s
   
   // Prevent excessive re-renders
   const hasInitialized = useRef(false);
+  const mapReadyCalled = useRef(false);
   
   // Memoize the component to prevent unnecessary re-renders
   const memoizedOnMapReady = useRef(onMapReady);
@@ -44,6 +45,21 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, s
     autoFetch: true  // ✅ Always fetch libraries
   });
 
+  // Debug: Log when libraries change
+  const prevLibrariesRef = useRef(libraries);
+  useEffect(() => {
+    // Only log if libraries actually changed
+    if (prevLibrariesRef.current !== libraries) {
+      console.log('🔍 Libraries changed:', {
+        count: libraries.length,
+        firstLibrary: libraries[0]?.name,
+        timestamp: new Date().toISOString(),
+        prevCount: prevLibrariesRef.current?.length || 0
+      });
+      prevLibrariesRef.current = libraries;
+    }
+  }, [libraries]);
+
   // State to track Mapbox markers
   const [mapMarkers, setMapMarkers] = useState<mapboxgl.Marker[]>([]);
 
@@ -51,9 +67,9 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, s
   const { isSignedIn, isLoaded: authLoaded, imageUrl } = useAuth();
 
   const handleLibraryClick = useCallback((library: Library) => {
-    setSelectedLibrary(selectedLibrary?.id === library.id ? null : library);
+    setSelectedLibrary(prev => prev?.id === library.id ? null : library);
     onLibrarySelect?.(library);
-  }, [selectedLibrary, onLibrarySelect]);
+  }, [onLibrarySelect]);
 
   const handleMapClick = useCallback((e: mapboxgl.MapMouseEvent) => {
     if (authLoaded && isSignedIn) {
@@ -81,7 +97,14 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, s
   }, []);
 
   useEffect(() => {
+    console.log('🗺️ Map initialization useEffect running:', {
+      hasContainer: !!mapContainer.current,
+      hasMap: !!map.current,
+      hasInitialized: hasInitialized.current
+    });
+    
     if (!mapContainer.current || map.current || hasInitialized.current) {
+      console.log('🚫 Map initialization skipped');
       return;
     }
 
@@ -91,8 +114,20 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, s
 
     // Define handler functions
     const handleLoad = () => {
+      console.log('🗺️ Map load event triggered');
+      
+      // Always set map as loaded (this is the mapbox event, not our callback)
       setIsMapLoaded(true);
-      memoizedOnMapReady.current?.(mapInstance!);
+      console.log('✅ Map loaded state set to true');
+      
+      // Only call the callback once
+      if (!mapReadyCalled.current) {
+        memoizedOnMapReady.current?.(mapInstance!);
+        mapReadyCalled.current = true;
+        console.log('✅ Map ready callback called (first time only)');
+      } else {
+        console.log('🚫 Map ready callback already called, skipping');
+      }
     };
 
     const handleGeolocate = (e: any) => {
@@ -159,12 +194,19 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, s
   }, [handleMapClick]); // Include handleMapClick dependency
 
   // Create and manage Mapbox markers when libraries change
+  const markersCreatedRef = useRef(false);
+  
   useEffect(() => {
     if (!map.current || !isMapLoaded) return;
+    
+    // Prevent multiple marker creation
+    if (markersCreatedRef.current) {
+      console.log('🚫 Markers already created, skipping recreation');
+      return;
+    }
 
-    console.log('🔄 Updating map markers, libraries count:', libraries.length);
-    console.log('📚 Libraries data:', libraries);
-
+    console.log('🔄 Creating map markers, libraries count:', libraries.length);
+    
     // Remove existing markers
     mapMarkers.forEach(marker => marker.remove());
     
@@ -222,12 +264,14 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, s
     
     console.log('✅ Created', newMarkers.length, 'markers');
     setMapMarkers(newMarkers as mapboxgl.Marker[]);
+    markersCreatedRef.current = true;
     
     // Cleanup on unmount
     return () => {
       newMarkers.forEach(marker => marker?.remove());
+      markersCreatedRef.current = false;
     };
-  }, [libraries, isMapLoaded, parseCoordinates, handleLibraryClick, mapMarkers]);
+  }, [libraries, isMapLoaded]); // Simplified dependencies
 
   return (
     <div className="relative w-full h-full">

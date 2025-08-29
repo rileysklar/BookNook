@@ -8,6 +8,7 @@ import { Map as MapboxMap } from 'mapbox-gl';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 const MapPage = memo(function MapPage() {
+  console.log('🔄 MapPage rendering at:', new Date().toISOString());
   
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [mapInstance, setMapInstance] = useState<MapboxMap | null>(null);
@@ -15,9 +16,14 @@ const MapPage = memo(function MapPage() {
   const [showCrosshairs, setShowCrosshairs] = useState(false);
 
   const handleMapReady = useCallback((map: MapboxMap) => {
+    // Prevent multiple calls
+    if (mapInstance === map) {
+      console.log('🚫 Map already set, skipping duplicate call');
+      return;
+    }
     setMapInstance(map);
-    console.log('Map is ready!');
-  }, []);
+    console.log('✅ Map is ready! (first time)');
+  }, [mapInstance]);
 
   const handleLocationUpdate = useCallback((coordinates: [number, number]) => {
     setUserLocation(coordinates);

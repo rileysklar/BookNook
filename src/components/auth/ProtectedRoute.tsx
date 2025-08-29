@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
+import { useUser, useAuth as useClerkAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -9,14 +9,17 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn } = useClerkAuth();
+  const { isLoaded } = useUser();
   const router = useRouter();
 
   useEffect(() => {
+    console.log('🔐 ProtectedRoute useEffect:', { isLoaded, isSignedIn });
     if (isLoaded && !isSignedIn) {
+      console.log('🚫 User not signed in, redirecting to home');
       router.push('/');
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoaded, isSignedIn]); // Remove router from dependencies
 
   // Always render the same structure, but conditionally show content
   return (

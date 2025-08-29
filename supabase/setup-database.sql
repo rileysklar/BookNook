@@ -1,13 +1,13 @@
--- Simple BookNook schema with RLS policies
--- Run this in your Supabase SQL editor
+-- BookNook Database Setup Script
+-- Run this in your Supabase SQL editor to fix the current issues
 
--- Enable PostGIS extension for geospatial queries
+-- Step 1: Enable PostGIS extension
 CREATE EXTENSION IF NOT EXISTS postgis;
 
--- Drop any existing tables (clean slate)
+-- Step 2: Drop existing libraries table if it exists
 DROP TABLE IF EXISTS libraries CASCADE;
 
--- Create libraries table with required fields
+-- Step 3: Create the libraries table with the correct schema
 CREATE TABLE libraries (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(200) NOT NULL,
@@ -18,29 +18,30 @@ CREATE TABLE libraries (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create index for coordinates
+-- Step 4: Create geospatial index
 CREATE INDEX idx_libraries_coordinates ON libraries USING GIST (coordinates);
 
--- Enable Row Level Security
+-- Step 5: Enable Row Level Security
 ALTER TABLE libraries ENABLE ROW LEVEL SECURITY;
 
--- Create policy to allow all users to read libraries
+-- Step 6: Create RLS policies to allow access
+-- Allow public read access to all libraries
 CREATE POLICY "Allow public read access to libraries" ON libraries
     FOR SELECT USING (true);
 
--- Create policy to allow authenticated users to insert libraries
+-- Allow authenticated users to insert libraries
 CREATE POLICY "Allow authenticated users to insert libraries" ON libraries
     FOR INSERT WITH CHECK (true);
 
--- Create policy to allow users to update their own libraries (when we add creator_id later)
+-- Allow users to update libraries (we'll restrict this later when we add creator_id)
 CREATE POLICY "Allow users to update libraries" ON libraries
     FOR UPDATE USING (true);
 
--- Create policy to allow users to delete libraries (when we add creator_id later)
+-- Allow users to delete libraries (we'll restrict this later when we add creator_id)
 CREATE POLICY "Allow users to delete libraries" ON libraries
     FOR DELETE USING (true);
 
--- Insert sample Austin libraries
+-- Step 7: Insert sample Austin libraries
 INSERT INTO libraries (name, description, coordinates, is_public) VALUES
 ('Zilker Park Little Library', 'A charming little library in the heart of Zilker Park', POINT(-97.7690, 30.2669), true),
 ('Barton Springs Community Library', 'Community library near the famous Barton Springs Pool', POINT(-97.7700, 30.2640), true),
@@ -48,5 +49,19 @@ INSERT INTO libraries (name, description, coordinates, is_public) VALUES
 ('East Austin Community Library', 'Community library serving East Austin neighborhoods', POINT(-97.7200, 30.2600), true),
 ('Hyde Park Tiny Library', 'Quaint library in the historic Hyde Park neighborhood', POINT(-97.7300, 30.3100), true);
 
--- Success message
-SELECT '🎉 Schema created with RLS policies! 5 Austin libraries ready for your map!' as message;
+-- Step 8: Verify the setup
+SELECT 
+    '🎉 Database setup complete!' as status,
+    COUNT(*) as library_count,
+    'libraries' as table_name
+FROM libraries;
+
+-- Step 9: Test a simple query
+SELECT 
+    id,
+    name,
+    ST_X(coordinates) as longitude,
+    ST_Y(coordinates) as latitude,
+    created_at
+FROM libraries
+ORDER BY created_at DESC;

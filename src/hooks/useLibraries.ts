@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import type { Library } from '@/types/database'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { Library } from '@/types/database'
 
 interface UseLibrariesOptions {
   coordinates?: [number, number]
@@ -9,43 +9,92 @@ interface UseLibrariesOptions {
 
 export function useLibraries(options: UseLibrariesOptions = {}) {
   const { coordinates, radius = 10, autoFetch = true } = options
-  
   const [libraries, setLibraries] = useState<Library[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
+  const maxRetries = 3
+  const retryTimeoutRef = useRef<NodeJS.Timeout>()
 
-  const fetchLibraries = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  const fetchLibraries = useCallback(async (isRetry = false) => {
+    // Prevent multiple simultaneous requests
+    if (loading && !isRetry) return
     
     try {
+      setLoading(true)
+      setError(null)
+      
       let url = '/api/libraries'
+      const params = new URLSearchParams()
       
       if (coordinates) {
-        const params = new URLSearchParams({
-          lat: coordinates[1].toString(),
-          lng: coordinates[0].toString(),
-          radius: radius.toString()
-        })
+        params.append('lng', coordinates[0].toString())
+        params.append('lat', coordinates[1].toString())
+        params.append('radius', radius.toString())
         url += `?${params.toString()}`
       }
       
+      console.log('🔍 Fetching libraries from:', url)
       const response = await fetch(url)
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch libraries: ${response.statusText}`)
+        const errorText = response.statusText || `HTTP ${response.status}`
+        throw new Error(`Failed to fetch libraries: ${errorText}`)
       }
       
       const data = await response.json()
+      console.log('✅ Libraries fetched successfully:', data.libraries?.length || 0)
+      
       setLibraries(data.libraries || [])
+      setRetryCount(0) // Reset retry count on success
+      
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       setError(errorMessage)
-      console.error('Error fetching libraries:', err)
+      console.error('❌ Error fetching libraries:', err)
+      
+      // Only retry if we haven't exceeded max retries and this isn't a retry
+      if (retryCount < maxRetries && !isRetry) {
+        const nextRetryCount = retryCount + 1
+        setRetryCount(nextRetryCount)
+        
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = Math.pow(2, nextRetryCount - 1) * 1000
+        
+        console.log(`🔄 Retrying in ${delay}ms (attempt ${nextRetryCount}/${maxRetries})`)
+        
+        retryTimeoutRef.current = setTimeout(() => {
+          fetchLibraries(true)
+        }, delay)
+      } else if (retryCount >= maxRetries) {
+        console.log('🚫 Max retries exceeded, stopping attempts')
+        setError('Failed to fetch libraries after multiple attempts. Please check your connection and try again.')
+      }
     } finally {
       setLoading(false)
     }
-  }, [coordinates, radius])
+  }, [coordinates, radius]) // Removed loading and retryCount to prevent infinite loops
+
+  // Cleanup retry timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Prevent multiple fetches
+  const hasFetchedRef = useRef(false);
+  
+  useEffect(() => {
+    console.log('🔄 useLibraries useEffect running, autoFetch:', autoFetch, 'hasFetched:', hasFetchedRef.current);
+    
+    if (autoFetch && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      fetchLibraries()
+    }
+  }, [autoFetch]) // Remove fetchLibraries from dependencies to prevent infinite loops
 
   const createLibrary = useCallback(async (libraryData: {
     name: string;
@@ -84,7 +133,7 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
       setError(errorMessage)
       throw err
     }
-  }, [libraries])
+  }, [])
 
   const updateLibrary = useCallback(async (libraryId: string, updateData: Partial<Library>) => {
     try {
@@ -136,21 +185,21 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
     }
   }, [])
 
-  // Auto-fetch libraries when coordinates change
-  useEffect(() => {
-    if (autoFetch) {
-      fetchLibraries()
-    }
-  }, [fetchLibraries, autoFetch])
+  const refreshLibraries = useCallback(() => {
+    setRetryCount(0) // Reset retry count
+    fetchLibraries()
+  }, [fetchLibraries])
 
   return {
     libraries,
     loading,
     error,
+    retryCount,
+    maxRetries,
     fetchLibraries,
     createLibrary,
     updateLibrary,
     deleteLibrary,
-    refetch: fetchLibraries
+    refreshLibraries,
   }
 }

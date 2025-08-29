@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase/client'
 import { auth } from '@clerk/nextjs/server'
-
-const supabase = createClient(
-  'https://sjespiofspkuhqvlpymy.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 // Update library
 export async function PUT(
@@ -47,6 +42,33 @@ export async function PUT(
     }
     
     console.log('🗄️ Supabase update data:', updateData)
+    console.log('🔍 Library ID to update:', libraryId)
+    
+    // Test connection first
+    console.log('🔌 Testing Supabase connection...')
+    const { data: testData, error: testError } = await supabase
+      .from('libraries')
+      .select('id')
+      .eq('id', libraryId)
+      .limit(1)
+    
+    if (testError) {
+      console.error('❌ Connection test failed:', testError)
+      return NextResponse.json(
+        { error: `Connection test failed: ${testError.message}` },
+        { status: 500 }
+      )
+    }
+    
+    if (!testData || testData.length === 0) {
+      console.error('❌ Library not found:', libraryId)
+      return NextResponse.json(
+        { error: 'Library not found' },
+        { status: 404 }
+      )
+    }
+    
+    console.log('✅ Library found, proceeding with update...')
     
     const { data, error } = await supabase
       .from('libraries')
@@ -91,19 +113,23 @@ export async function DELETE(
 
     const libraryId = (await params).id
 
-    // Delete the library
+    // Delete the library (soft delete using status)
+    console.log('🗑️ Soft deleting library:', libraryId)
+    
     const { error } = await supabase
       .from('libraries')
-      .delete()
+      .update({ status: 'deleted', updated_at: new Date().toISOString() })
       .eq('id', libraryId)
 
     if (error) {
-      console.error('Failed to delete library:', error)
+      console.error('❌ Failed to delete library:', error)
       return NextResponse.json(
         { error: 'Failed to delete library' },
         { status: 500 }
       )
     }
+    
+    console.log('✅ Library soft deleted successfully')
 
     return NextResponse.json({ success: true })
   } catch (error) {
