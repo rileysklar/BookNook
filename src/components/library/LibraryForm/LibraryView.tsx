@@ -25,14 +25,17 @@ export default function LibraryView({ library, onClose, onSwitchToEdit }: Librar
     <div className="px-6 py-4 space-y-4">
       {/* Library Info */}
       <div className="space-y-3">
+      <h2 className="text-lg text-slate-900 font-bold">{library.name}</h2>
+        <div className="flex justify-between">
         <div className="flex items-center space-x-2">
           <MapPin size={16} className="text-gray-500" />
           <span className="text-sm text-gray-600">Location</span>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
+        <div className="bg-gray-100 rounded-lg p-3">
           <p className="text-xs text-gray-600">
             {formatCoordinates(library.coordinates)}
           </p>
+        </div>
         </div>
       </div>
 

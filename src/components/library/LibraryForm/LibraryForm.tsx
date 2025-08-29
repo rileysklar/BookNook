@@ -180,13 +180,13 @@ export default function LibraryForm({ mode, coordinates, library, onClose }: Lib
         )}
 
         {/* Action Buttons */}
-        <div className="flex space-x-3 pt-4 pb-2">
+        <div className="flex flex-col gap-2 space-x-3 pt-4 pb-2">
           {/* Delete Button - Only for edit mode */}
           {mode === 'edit' && (
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center space-x-2"
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
             >
               <Trash2 size={16} />
               <span>Delete</span>

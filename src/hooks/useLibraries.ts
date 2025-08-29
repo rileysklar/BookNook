@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Library } from '@/types/database'
+import { useAuth } from './useAuth'
+import { useAuth as useClerkAuth } from '@clerk/nextjs'
 
 interface UseLibrariesOptions {
   coordinates?: [number, number]
@@ -14,6 +16,8 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const maxRetries = 3
+  const { isSignedIn } = useAuth()
+  const { getToken } = useClerkAuth()
   const retryTimeoutRef = useRef<NodeJS.Timeout>()
 
   const fetchLibraries = useCallback(async (isRetry = false) => {
@@ -103,10 +107,14 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
     is_public: boolean;
   }) => {
     try {
+      // Get the auth token from Clerk
+      const token = await getToken()
+      
       const response = await fetch('/api/libraries', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(libraryData),
       })
@@ -137,10 +145,14 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
 
   const updateLibrary = useCallback(async (libraryId: string, updateData: Partial<Library>) => {
     try {
+      // Get the auth token from Clerk
+      const token = await getToken()
+      
       const response = await fetch(`/api/libraries/${libraryId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(updateData),
       })
@@ -166,8 +178,14 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
 
   const deleteLibrary = useCallback(async (libraryId: string) => {
     try {
+      // Get the auth token from Clerk
+      const token = await getToken()
+      
       const response = await fetch(`/api/libraries/${libraryId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       })
 
       if (!response.ok) {

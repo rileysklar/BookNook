@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     console.log('🔌 Testing basic connection...')
     const { data: testData, error: testError } = await supabase
       .from('libraries')
-      .select('count')
+      .select('id')
       .limit(1)
     
     if (testError) {
