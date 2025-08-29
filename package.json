@@ -5,10 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.6",
+    "@supabase/supabase-js": "^2.56.0",
     "@types/mapbox-gl": "^3.4.1",
     "lucide-react": "^0.542.0",
     "mapbox-gl": "^3.14.0",
@@ -21,6 +24,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "eslint": "^9.34.0",
+    "eslint-config-next": "^15.5.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

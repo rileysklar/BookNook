@@ -4,7 +4,7 @@ import mapboxgl from 'mapbox-gl';
 export const MAPBOX_CONFIG = {
   accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '',
   style: 'mapbox://styles/mapbox/streets-v12',
-  center: [-74.006, 40.7128] as [number, number], // Default to NYC, will be overridden by user location
+  center: [-97.7431, 30.2672] as [number, number], // Default to Austin, TX, will be overridden by user location
   zoom: 12,
   pitch: 0,
   bearing: 0,

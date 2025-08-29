@@ -2,24 +2,22 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  console.log('🔍 Middleware running for:', request.nextUrl.pathname)
+  console.log('🔒 Middleware executing for:', request.nextUrl.pathname)
   
-  // Intercept requests to the root path and redirect immediately
-  if (request.nextUrl.pathname === '/') {
-    console.log('🚀 Redirecting / to /map')
-    return NextResponse.redirect(new URL('/map', request.url))
+  // Allow Clerk routes and static assets through
+  if (request.nextUrl.pathname.startsWith('/_next') || 
+      request.nextUrl.pathname.startsWith('/api') ||
+      request.nextUrl.pathname.startsWith('/sign-in') ||
+      request.nextUrl.pathname.startsWith('/sign-up')) {
+    console.log('✅ Allowing Clerk/static route through')
+    return NextResponse.next()
   }
   
-  // Also catch any other potential root variations
-  if (request.nextUrl.pathname === '' || request.nextUrl.pathname === '/index') {
-    console.log('🚀 Redirecting empty/index to /map')
-    return NextResponse.redirect(new URL('/map', request.url))
-  }
-  
-  console.log('➡️ Continuing to:', request.nextUrl.pathname)
+  // Allow all other requests through - authentication is handled by components
+  console.log('✅ Middleware allowing request through')
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/', '/index', '/((?!_next|api|favicon.ico).*)'],
+  matcher: ['/((?!_next|api|favicon.ico).*)']
 }
