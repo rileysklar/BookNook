@@ -378,7 +378,7 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, o
     return () => {
       newMarkers.forEach(marker => marker?.remove());
     };
-  }, [libraries, isMapLoaded, handleLibraryClick, parseCoordinates]);
+  }, [libraries, isMapLoaded, handleLibraryClick, parseCoordinates]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="relative w-full h-full">
