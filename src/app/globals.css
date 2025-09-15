@@ -103,6 +103,11 @@ h1, h2 {
   position: relative;
 }
 
+.mapboxgl-ctrl-top-right  {
+  padding-top: 10px;
+  margin: 0;
+}
+
 /* Bottom sheet animations */
 .bottom-sheet-enter {
   transform: translateY(100%);

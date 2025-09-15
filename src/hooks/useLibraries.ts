@@ -18,7 +18,7 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
   const maxRetries = 3
   const { isSignedIn } = useAuth()
   const { getToken } = useClerkAuth()
-  const retryTimeoutRef = useRef<NodeJS.Timeout>()
+  const retryTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   const fetchLibraries = useCallback(async (isRetry = false) => {
     // Prevent multiple simultaneous requests
@@ -77,7 +77,7 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
     } finally {
       setLoading(false)
     }
-  }, [coordinates, radius]) // Removed loading and retryCount to prevent infinite loops
+  }, [coordinates, radius]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cleanup retry timeout on unmount
   useEffect(() => {
@@ -86,7 +86,7 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
         clearTimeout(retryTimeoutRef.current)
       }
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Prevent multiple fetches
   const hasFetchedRef = useRef(false);
@@ -98,7 +98,7 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
       hasFetchedRef.current = true;
       fetchLibraries()
     }
-  }, [autoFetch]) // Remove fetchLibraries from dependencies to prevent infinite loops
+  }, [autoFetch]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const createLibrary = useCallback(async (libraryData: {
     name: string;
@@ -141,7 +141,7 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
       setError(errorMessage)
       throw err
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateLibrary = useCallback(async (libraryId: string, updateData: Partial<Library>) => {
     try {
@@ -174,7 +174,7 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
       setError(errorMessage)
       throw err
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const deleteLibrary = useCallback(async (libraryId: string) => {
     try {
@@ -201,7 +201,7 @@ export function useLibraries(options: UseLibrariesOptions = {}) {
       setError(errorMessage)
       throw err
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshLibraries = useCallback(() => {
     setRetryCount(0) // Reset retry count

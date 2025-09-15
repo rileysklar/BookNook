@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       console.log('🚫 User not signed in, redirecting to home');
       router.push('/');
     }
-  }, [isLoaded, isSignedIn]); // Remove router from dependencies
+  }, [isLoaded, isSignedIn, router]);
 
   // Always render the same structure, but conditionally show content
   return (

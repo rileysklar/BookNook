@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, AlertCircle, Plus, Save, Trash2 } from 'lucide-react';
-import { useLibraries } from '@/hooks/useLibraries';
+import { useLibraryContext } from '@/contexts/LibraryContext';
 import { useAuth } from '@/hooks/useAuth';
 import type { Library } from '@/types/database';
 import type { LibraryFormData } from './types';
@@ -24,7 +24,7 @@ export default function LibraryForm({ mode, coordinates, library, onClose }: Lib
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
-  const { createLibrary, updateLibrary, deleteLibrary } = useLibraries({ autoFetch: false });
+  const { createLibrary, updateLibrary, deleteLibrary } = useLibraryContext();
   const { isSignedIn, isLoaded, id: userId } = useAuth();
 
   // Initialize form data when editing

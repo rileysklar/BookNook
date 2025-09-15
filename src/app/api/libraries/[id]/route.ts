@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/server'
 import { auth } from '@clerk/nextjs/server'
 
 // Update library
@@ -46,6 +46,7 @@ export async function PUT(
     
     // Test connection first
     console.log('🔌 Testing Supabase connection...')
+    const supabase = createClient();
     const { data: testData, error: testError } = await supabase
       .from('libraries')
       .select('id')
@@ -85,6 +86,40 @@ export async function PUT(
       )
     }
 
+    console.log('✅ Library updated successfully:', data)
+
+    // Log the library update activity
+    try {
+      const activityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/activities`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': request.headers.get('authorization') || '',
+          'Cookie': request.headers.get('cookie') || '',
+        },
+        body: JSON.stringify({
+          activity_type: 'library_updated',
+          entity_type: 'library',
+          entity_id: libraryId,
+          title: `Updated library: ${data.name}`,
+          description: data.description || 'No description provided',
+          metadata: {
+            library_name: data.name,
+            library_id: libraryId,
+            updated_fields: { name, description, is_public }
+          }
+        })
+      });
+      
+      if (activityResponse.ok) {
+        console.log('✅ Library update activity logged');
+      } else {
+        console.log('⚠️ Failed to log library update activity');
+      }
+    } catch (activityError) {
+      console.log('⚠️ Error logging library update activity:', activityError);
+    }
+
     return NextResponse.json({ library: data })
   } catch (error) {
     console.error('Error updating library:', error)
@@ -116,6 +151,7 @@ export async function DELETE(
     // Delete the library (soft delete using status)
     console.log('🗑️ Soft deleting library:', libraryId)
     
+    const supabase = createClient();
     const { error } = await supabase
       .from('libraries')
       .update({ status: 'deleted', updated_at: new Date().toISOString() })
@@ -130,6 +166,37 @@ export async function DELETE(
     }
     
     console.log('✅ Library soft deleted successfully')
+
+    // Log the library deletion activity
+    try {
+      const activityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/activities`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': request.headers.get('authorization') || '',
+          'Cookie': request.headers.get('cookie') || '',
+        },
+        body: JSON.stringify({
+          activity_type: 'library_deleted',
+          entity_type: 'library',
+          entity_id: libraryId,
+          title: `Deleted library: ${libraryId}`,
+          description: 'Library was soft deleted',
+          metadata: {
+            library_id: libraryId,
+            deletion_type: 'soft_delete'
+          }
+        })
+      });
+      
+      if (activityResponse.ok) {
+        console.log('✅ Library deletion activity logged');
+      } else {
+        console.log('⚠️ Failed to log library deletion activity');
+      }
+    } catch (activityError) {
+      console.log('⚠️ Error logging library deletion activity:', activityError);
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

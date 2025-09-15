@@ -45,6 +45,28 @@ A mobile-first, map-based application that creates a global network of tiny libr
 6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
+## 🗄️ Database Setup
+
+The app uses Supabase for the database. To set up the database:
+
+1. **Create a Supabase project**
+   - Go to [Supabase](https://supabase.com)
+   - Create a new project
+   - Get your project URL and anon key
+
+2. **Add Supabase credentials to environment**
+   ```bash
+   # Add to .env.local
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+3. **Run the database schema**
+   - Open your Supabase SQL Editor
+   - Copy and paste the contents of `supabase/complete-schema.sql`
+   - Execute the SQL to create all tables, indexes, and functions
+   - The schema includes the `activities` table for tracking user actions and search history
+
 ## 🗂 Project Structure
 
 ```

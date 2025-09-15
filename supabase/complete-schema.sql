@@ -32,6 +32,29 @@ CREATE TABLE libraries (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create activity_types enum for tracking user activities
+CREATE TYPE activity_type AS ENUM (
+    'library_created',
+    'library_updated', 
+    'library_deleted',
+    'search_performed',
+    'library_viewed',
+    'library_rated'
+);
+
+-- Create activities table for tracking user actions
+CREATE TABLE activities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) NOT NULL,
+    activity_type activity_type NOT NULL,
+    entity_id UUID,
+    entity_type VARCHAR(50),
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- ============================================================================
 -- PHASE 3: INDEXES & PERFORMANCE
 -- ============================================================================
@@ -44,6 +67,12 @@ CREATE INDEX idx_libraries_status ON libraries(status);
 
 -- Created date index for sorting (used by API)
 CREATE INDEX idx_libraries_created ON libraries(created_at DESC);
+
+-- Activities table indexes for performance
+CREATE INDEX idx_activities_user_id ON activities(user_id);
+CREATE INDEX idx_activities_created_at ON activities(created_at DESC);
+CREATE INDEX idx_activities_type ON activities(activity_type);
+CREATE INDEX idx_activities_entity ON activities(entity_id, entity_type);
 
 -- ============================================================================
 -- PHASE 4: ROW LEVEL SECURITY (RLS)
@@ -64,6 +93,22 @@ CREATE POLICY "Allow users to update libraries" ON libraries
 
 CREATE POLICY "Allow users to delete libraries" ON libraries
     FOR DELETE USING (true);
+
+-- Enable RLS on activities table
+ALTER TABLE activities ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies for activities (users can only see their own activities)
+CREATE POLICY "Users can view their own activities" ON activities
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own activities" ON activities
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own activities" ON activities
+    FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own activities" ON activities
+    FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================================
 -- PHASE 5: REQUIRED FUNCTIONS
@@ -117,6 +162,74 @@ BEGIN
     ORDER BY distance_km ASC;
 END;
 $$;
+
+-- Function to create search activity (used by API)
+CREATE OR REPLACE FUNCTION create_search_activity(
+    p_user_id UUID,
+    p_search_query TEXT,
+    p_results_count INTEGER DEFAULT 0,
+    p_coordinates POINT DEFAULT NULL
+)
+RETURNS UUID AS $$
+DECLARE
+    activity_id UUID;
+BEGIN
+    INSERT INTO activities (
+        user_id,
+        activity_type,
+        entity_type,
+        title,
+        description,
+        metadata
+    ) VALUES (
+        p_user_id,
+        'search_performed',
+        'search',
+        'Searched for: ' || p_search_query,
+        'Found ' || p_results_count || ' results',
+        jsonb_build_object(
+            'search_query', p_search_query,
+            'results_count', p_results_count,
+            'coordinates', p_coordinates
+        )
+    ) RETURNING id INTO activity_id;
+    
+    RETURN activity_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to get user's recent activities (used by API)
+CREATE OR REPLACE FUNCTION get_user_recent_activities(
+    p_user_id UUID,
+    p_limit INTEGER DEFAULT 10
+)
+RETURNS TABLE (
+    id UUID,
+    activity_type activity_type,
+    entity_id UUID,
+    entity_type VARCHAR(50),
+    title VARCHAR(200),
+    description TEXT,
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        a.id,
+        a.activity_type,
+        a.entity_id,
+        a.entity_type,
+        a.title,
+        a.description,
+        a.metadata,
+        a.created_at
+    FROM activities a
+    WHERE a.user_id = p_user_id
+    ORDER BY a.created_at DESC
+    LIMIT p_limit;
+END;
+$$ LANGUAGE plpgsql;
 
 -- ============================================================================
 -- PHASE 6: SAMPLE DATA

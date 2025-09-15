@@ -13,7 +13,7 @@ export default function BottomSheetHandle({
 }: BottomSheetHandleProps) {
   return (
     <div 
-      className="flex justify-center pt-3 pb-2 rounded-t-3xl shadow-2xl bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+      className="flex justify-center py-4 rounded-t-3xl shadow-2xl bg-white cursor-pointer hover:bg-gray-50 transition-colors"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}

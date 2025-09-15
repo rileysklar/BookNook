@@ -13,14 +13,20 @@ export interface User {
 
 export interface Library {
   id: string
-  creator_id: string
+  creator_id?: string // Optional until database migration is run
   name: string
   description?: string
-  coordinates: string // PostGIS POINT format: "(-97.769,30.2669)"
+  coordinates: string | number[] // PostGIS POINT format: "(-97.769,30.2669)" or array [lng, lat]
   is_public: boolean
   status: 'active' | 'inactive' | 'pending'
   created_at: string
   updated_at: string
+  creator?: {
+    id: string
+    username: string
+    display_name?: string
+    avatar_url?: string
+  }
 }
 
 export interface Book {

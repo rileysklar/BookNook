@@ -12,6 +12,7 @@ import BottomSheetHandle from './BottomSheetHandle';
 interface BottomSheetProps {
   isOpen: boolean;
   onToggle: () => void;
+  onLocationSelect?: (coordinates: [number, number], placeName: string) => void;
   children?: React.ReactNode;
 }
 
@@ -19,7 +20,7 @@ interface BottomSheetProps {
 // MAIN BOTTOM SHEET COMPONENT
 // ============================================================================
 
-export default function BottomSheet({ isOpen, onToggle, children }: BottomSheetProps) {
+export default function BottomSheet({ isOpen, onToggle, onLocationSelect, children }: BottomSheetProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
   const [currentY, setCurrentY] = useState(0);
@@ -30,6 +31,9 @@ export default function BottomSheet({ isOpen, onToggle, children }: BottomSheetP
     coordinates?: [number, number];
     library?: Library;
   } | null>(null);
+
+  // View mode state
+  const [viewMode, setViewMode] = useState<'quick-actions' | 'list-view'>('quick-actions');
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsDragging(true);
@@ -61,6 +65,7 @@ export default function BottomSheet({ isOpen, onToggle, children }: BottomSheetP
   useEffect(() => {
     if (!isOpen) {
       setLibraryOperation(null);
+      setViewMode('quick-actions'); // Reset to quick actions when sheet closes
     }
   }, [isOpen]);
 
@@ -95,14 +100,22 @@ export default function BottomSheet({ isOpen, onToggle, children }: BottomSheetP
     }
   };
 
+  // Close the entire BottomSheet
+  const closeBottomSheet = useCallback(() => {
+    console.log('📱 Closing BottomSheet via global method');
+    setLibraryOperation(null);
+    onToggle(); // This will close the BottomSheet
+  }, [onToggle]);
+
   // Expose methods globally for external access
   useEffect(() => {
     (window as any).LibraryBottomSheet = {
       openAddLibrary,
       openEditLibrary,
-      closeLibraryOperation
+      closeLibraryOperation,
+      close: closeBottomSheet
     };
-  }, [openAddLibrary, openEditLibrary, closeLibraryOperation]);
+  }, [openAddLibrary, openEditLibrary, closeLibraryOperation, closeBottomSheet]);
 
   return (
     <>
@@ -139,8 +152,11 @@ export default function BottomSheet({ isOpen, onToggle, children }: BottomSheetP
         <div className="bg-white px-6 pb-8 rounded-t-3xl shadow-2xl">
           <BottomSheetContent
             libraryOperation={libraryOperation}
+            viewMode={viewMode}
             onClose={closeLibraryOperation}
             onSwitchToEdit={switchToEditMode}
+            onLocationSelect={onLocationSelect}
+            onViewModeChange={setViewMode}
           >
             {children}
           </BottomSheetContent>
