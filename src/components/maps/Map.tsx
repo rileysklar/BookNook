@@ -378,7 +378,7 @@ const Map = memo(function Map({ onMapReady, onLocationUpdate, onLibrarySelect, o
     return () => {
       newMarkers.forEach(marker => marker?.remove());
     };
-  }, [libraries, isMapLoaded, handleLibraryClick, mapMarkers, parseCoordinates]);
+  }, [libraries, isMapLoaded, handleLibraryClick, parseCoordinates]);
 
   return (
     <div className="relative w-full h-full">
